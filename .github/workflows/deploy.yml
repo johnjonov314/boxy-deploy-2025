@@ -17,12 +17,22 @@ jobs:
         run: npm ci
 
       - name: 🛠 Build project
-        run: npx vite build
+        run: |
+          chmod +x node_modules/.bin/vite
+          npx vite build
 
       - name: 📥 Install rclone
         run: curl https://rclone.org/install.sh | sudo bash
 
       - name: ☁ Upload to Yandex Object Storage
+        env:
+          RCACHE: rclone.conf
         run: |
+          echo "[yandex]" > $RCACHE
+          echo "type = s3" >> $RCACHE
+          echo "provider = Yandex" >> $RCACHE
+          echo "access_key_id = ${{ secrets.YANDEX_ACCESS_KEY }}" >> $RCACHE
+          echo "secret_access_key = ${{ secrets.YANDEX_SECRET_KEY }}" >> $RCACHE
+          echo "endpoint = https://storage.yandexcloud.net" >> $RCACHE
           echo "🚚 Загрузка в бакет ${{ secrets.YANDEX_BUCKET_NAME }}"
-          rclone --config=rclone.conf sync ./dist yandex:${{ secrets.YANDEX_BUCKET_NAME }} --progress
+          rclone --config=$RCACHE sync ./dist yandex:${{ secrets.YANDEX_BUCKET_NAME }} --progress
