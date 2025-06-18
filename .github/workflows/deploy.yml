@@ -17,7 +17,7 @@ jobs:
         run: npm install
 
       - name: 🛠 Build project
-        run: npx vite build
+        run: npm run build
 
       - name: 📥 Install rclone
         run: curl https://rclone.org/install.sh | sudo bash
